@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Product Animation</title>
+  <link rel="stylesheet" href="https://use.typekit.net/zve0fzf.css">
+  <style>
+    @import url('https://use.typekit.net/zve0fzf.css');
+
+    body {
+      font-family: gotham-light, sans-serif;
+      background-color: #00A2A2;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #animation-container {
+      width: 600px;
+      height: 600px;
+      position: relative;
+      margin: auto;
+      background-color: #00A2A2;
+      overflow: hidden;
+      display: none; /* Hidden initially */
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 60px;
+    }
+
+    #logo {
+      margin-top: 10px;
+      width: 100px; /* Adjust the size as needed */
+    }
+
+    #image-container {
+      height: 400px; /* Increase the height of the image container */
+      overflow: hidden; /* Ensure overflow is hidden */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .animation-frame {
+      width: 70%;
+      height: auto;
+      transform: scale(0.8); /* Increase the scale to make the images larger */
+      display: none;
+      transition: opacity 0.1s ease-in-out;
+    }
+
+    .animation-frame.active {
+      display: block;
+      opacity: 1;
+    }
+
+    #text-container {
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    #animated-text {
+      font-family: neighbor, sans-serif;
+      font-weight: 900;
+      font-size: 24px; /* Increased font size */
+      color: white;
+      text-transform: uppercase;
+      white-space: pre-wrap;
+      letter-spacing: .15em;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    #changing-word {
+      display: inline-block;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    /* Loading screen styles */
+    #loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #00A2A2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+
+    .loading-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-icon {
+      margin: 20px;
+      text-align: center;
+    }
+
+    .loading-icon img {
+      width: 50px; /* Adjust as needed */
+      margin-bottom: 10px;
+    }
+
+    .loading-icon p {
+      font-family: neighbor, sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      color: white;
+      text-transform: uppercase;
+      margin: 0;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loading-row">
+      <div class="loading-icon">
+        <img src="Peace.svg" alt="Peace">
+        <p>Peace</p>
+      </div>
+      <div class="loading-icon">
+        <img src="Love.svg" alt="Love">
+        <p>Love</p>
+      </div>
+      <div class="loading-icon">
+        <img src="Cocoa.svg" alt="Cocoa">
+        <p>Cocoa</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="animation-container">
+    <img id="logo" src="logo-yellow.png" alt="Logo">
+    <div id="animation-content">
+      <div id="image-container"></div>
+      <div id="text-container">
+        <div id="animated-text">Cocoa is rich in antioxidants<br> and can improve your<br><span id="changing-word">brain function</span>!</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const imagePaths = [
+      'package-1.png',
+      'package-2.png',
+      'package-3.png',
+      'package-4.png',
+      'package-5.png',
+      'package-6.png',
+      'package-7.png',
+      'package-8.png',
+      'package-9.png',
+      'package-10.png',
+      'package-11.png',
+      'package-12.png',
+      'package-13.png',
+      'package-14.png',
+      'package-15.png',
+      'package-16.png',
+      'package-17.png',
+      'package-18.png',
+      'package-19.png',
+      'package-20.png'
+    ];
+
+    const colors = ['#00A2A2', '#0D9C4A', '#E671AB', '#F26539', '#FFC20E'];
+    const logos = ['logo-yellow.png', 'logo-pink.png', 'logo-blue.png', 'logo-green.png', 'logo-orange.png'];
+    let currentColorIndex = 0;
+
+    let currentFrame = 0;
+    const speed = 150; // Adjust speed as needed for smoother animation
+
+    const container = document.getElementById('animation-container');
+    const imageContainer = document.getElementById('image-container');
+    const logoElement = document.getElementById('logo');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    // Load images
+    let imagesLoaded = 0;
+    imagePaths.forEach((path, index) => {
+      const img = document.createElement('img');
+      img.src = path;
+      img.classList.add('animation-frame');
+      if (index === 0) img.classList.add('active');
+      img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === imagePaths.length) {
+          setTimeout(() => {
+            gsap.to("#loading-screen", { opacity: 0, duration: 1, onComplete: () => {
+              loadingScreen.style.display = 'none';
+              container.style.display = 'flex';
+              animate(); // Start animation after images are loaded
+            }});
+          }, 2000); // Extend the loading duration
+        }
+      };
+      imageContainer.appendChild(img);
+    });
+
+    const frames = document.querySelectorAll('.animation-frame');
+
+    // Animation function
+    function animate() {
+      if (currentFrame < frames.length - 1) {
+        frames[currentFrame].classList.remove('active');
+        currentFrame++;
+        frames[currentFrame].classList.add('active');
+        setTimeout(animate, speed);
+      } else {
+        frames[currentFrame].classList.remove('active');
+        currentFrame = 0; // Reset to the first frame
+        frames[currentFrame].classList.add('active');
+      }
+    }
+
+    // Background color and logo change function
+    function changeBackgroundColorAndLogo() {
+      container.style.backgroundColor = colors[currentColorIndex];
+      logoElement.src = logos[currentColorIndex];
+      currentColorIndex = (currentColorIndex + 1) % colors.length;
+    }
+
+    setInterval(changeBackgroundColorAndLogo, 1500);
+
+    // Text replacement function
+    const words = ["brain function", "mood", "energy", "chocolate cravings", "day"];
+    let currentWordIndex = 0;
+
+    function typeWord(word) {
+      const changingWord = document.getElementById('changing-word');
+      changingWord.style.opacity = 0;
+      setTimeout(() => {
+        changingWord.textContent = '';
+        let i = 0;
+        const typingInterval = setInterval(() => {
+          if (i < word.length) {
+            changingWord.textContent += word.charAt(i);
+            i++;
+          } else {
+            clearInterval(typingInterval);
+            setTimeout(deleteWord, 1000); // Increase the pause duration
+          }
+        }, 100); // Increase the typing speed
+        changingWord.style.opacity = 1;
+      }, 200); // Increase the delay before typing starts
+    }
+
+    function deleteWord() {
+      const changingWord = document.getElementById('changing-word');
+      let word = changingWord.textContent;
+      changingWord.style.opacity = 0;
+      setTimeout(() => {
+        let i = word.length;
+        const deletingInterval = setInterval(() => {
+          if (i > 0) {
+            changingWord.textContent = word.substring(0, i - 1);
+            i--;
+          } else {
+            clearInterval(deletingInterval);
+            currentWordIndex = (currentWordIndex + 1) % words.length;
+            setTimeout(() => typeWord(words[currentWordIndex]), 500); // Increase the delay before typing the new word
+          }
+        }, 100); // Increase the deleting speed
+        changingWord.style.opacity = 1;
+      }, 200); // Increase the delay before deleting starts
+    }
+
+    typeWord(words[currentWordIndex]);
+
+    // GSAP animation for loading icons
+    gsap.fromTo(".loading-icon", 
+      { x: -100, opacity: 0 }, 
+      { x: 0, opacity: 1, duration: 1.5, ease: "elastic.out(1, 0.3)", stagger: 0.3 }
+    );
+  </script>
+</body>
+</html>
